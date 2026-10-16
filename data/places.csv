@@ -1,0 +1,7 @@
+id,name,category,area,duration,cost,lat,lng,icon,description,tip
+malecon,Malecón 2000,Paseo,Centro,90,0,-2.1903,-79.8815,river,"Camina junto al río Guayas entre jardines, plazas y miradores. Una pausa al aire libre en el corazón de la ciudad.",Lleva agua y protección solar. El recorrido es peatonal.
+penas,Barrio Las Peñas,Cultura,Cerro Santa Ana,75,0,-2.1793,-79.8758,houses,"Calles empedradas, fachadas de colores y rincones llenos de historia a orillas del Guayas.",Usa calzado cómodo. Hay pendientes y escaleras.
+santay,Isla Santay,Naturaleza,Río Guayas,150,0,-2.218,-79.862,forest,Un paisaje de manglar y senderos para descubrir la naturaleza cerca de la ciudad.,Consulta el acceso y los horarios antes de salir. Lleva repelente.
+seminario,Parque Seminario,Naturaleza,Centro,40,0,-2.1944,-79.884,park,"Un pequeño jardín urbano frente a la Catedral, conocido por las iguanas que habitan entre sus árboles.",Observa a los animales sin alimentarlos ni tocarlos.
+santa-ana,Cerro Santa Ana,Mirador,Cerro Santa Ana,100,0,-2.1786,-79.8763,hill,Sube las escalinatas y disfruta de una vista panorámica del río y la ciudad desde lo alto.,Toma descansos durante la subida. El recorrido tiene escaleras.
+historico,Parque Histórico,Cultura,Samborondón,120,0,-2.1447,-79.8677,heritage,Arquitectura tradicional y espacios verdes para acercarte a la historia de la región.,"Verifica horarios, tarifas y disponibilidad con el lugar antes de visitarlo."

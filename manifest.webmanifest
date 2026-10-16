@@ -1,0 +1,11 @@
+{
+ "id":"./", "name":"EcoRuta · Explora Guayaquil", "short_name":"EcoRuta",
+ "description":"Descubre lugares de Guayaquil y guarda tu ruta sin conexión.",
+ "lang":"es", "start_url":"./", "scope":"./", "display":"standalone",
+ "background_color":"#f8f9f5", "theme_color":"#164c39",
+ "icons":[
+  {"src":"./assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+  {"src":"./assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+  {"src":"./assets/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+ ]
+}

@@ -1,0 +1,9 @@
+{
+  "name":"ecoruta",
+  "version":"1.0.0",
+  "private":true,
+  "type":"module",
+  "description":"PWA de rutas locales con jQuery, MVC e IndexedDB",
+  "scripts":{"test":"node tests/check.mjs"},
+  "engines":{"node":">=20"}
+}
