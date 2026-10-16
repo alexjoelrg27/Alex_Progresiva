@@ -43,7 +43,7 @@ export class View {
  }
  mapLinks(place,mode){
   $('#map-place-name').text(place.name);
-  $('#map-coordinates').text(`${place.area} · ${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`);
+  $('#map-coordinates').text(`${place.area} · Coordenadas de referencia: ${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`);
   $('#map-directions').attr('href',mapsDirectionsURL(place,mode));
   $('#map-external').attr('href',mapsSearchURL(place));
  }

@@ -1,4 +1,4 @@
-const CACHE='ecoruta-v3';
+const CACHE='ecoruta-v4';
 const BASE=new URL('./',self.location.href);
 const FILES=['./','./index.html','./view/styles.css','./view/view.js','./controller/app.js','./model/database.js','./model/catalog.js','./model/google.js','./model/maps-urls.js','./data/places.json','./data/places.csv','./data/places.xml','./vendor/jquery.min.js','./vendor/sql-wasm.js','./vendor/sql-wasm.wasm','./config.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-maskable-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES.map(p=>new URL(p,BASE).href))).then(()=>self.skipWaiting()));});
