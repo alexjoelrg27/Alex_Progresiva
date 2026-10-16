@@ -3,6 +3,7 @@ import {Catalog,normalize} from '../model/catalog.js';
 import {View} from '../view/view.js';
 import {showGoogleMap} from '../model/google.js';
 const db=new LocalDatabase(),view=new View(),config=window.ECORUTA_CONFIG||{},catalog=new Catalog(db,config);
+let mapPlaces=[],mapVersion=0;
 let places=[],favorites=[],category='Todos',query='',detailId=null,installPrompt=null,ready=false;
 const render=()=>view.render(places,favorites,category,query);
 function findPlace(id){return places.find(p=>p.id===id)||favorites.find(f=>f.id===id)?.place;}
@@ -16,11 +17,27 @@ async function toggleFavorite(id){
  view.toast(existing?'Lugar eliminado de tu ruta.':'Guardado en tu ruta. Disponible sin conexión.');
 }
 function guarded(fn){return async function(...args){try{await fn.apply(this,args);}catch(error){view.toast(error.message||'No se pudo completar la acción.');}};}
-async function openMap(items){
- const dialog=document.querySelector('#map-dialog');if(!dialog.open)dialog.showModal();$('#map-status').text('Conectando con Google Maps…');$('#map').empty();
- try{await showGoogleMap(config,items,document.querySelector('#map'));$('#map-status').text('Selecciona un marcador para ver el lugar.');}
- catch(e){$('#map-status').text(e.message);}
+async function refreshMap(){
+ const version=++mapVersion;
+ const place=mapPlaces.find(p=>p.id===$('#map-place').val());if(!place)return;
+ view.mapLinks(place,$('#map-travel').val());
+ $('#map-status').text('Abriendo la vista de Google Maps…');
+ // Each request owns its own container, so an older async response cannot overwrite the selected place.
+ const container=document.createElement('div');container.className='map-canvas';
+ document.querySelector('#map').replaceChildren(container);
+ try{
+  const result=await showGoogleMap(config,[place],container);
+  if(version!==mapVersion)return;
+  $('#map-status').text(result.mode==='javascript'?'Google Maps JavaScript API · mapa interactivo con marcador.':result.apiError?'Vista web de Google Maps · la API personalizada no respondió.':'Vista web de Google Maps · consulta el lugar o abre las indicaciones.');
+ }catch(e){if(version===mapVersion){$('#map-status').text(e.message);container.textContent='Ubicación guardada: '+place.lat+', '+place.lng;container.classList.add('map-offline');}}
 }
+async function openMap(items){
+ mapPlaces=items.filter(Boolean);if(!mapPlaces.length){view.toast('Todavía no hay lugares para mostrar.');return;}
+ view.mapControls(mapPlaces);
+ const dialog=document.querySelector('#map-dialog');if(!dialog.open)dialog.showModal();
+ await refreshMap();
+}
+
 function navigate(page){view.page(page);history.replaceState(null,'',`#${page}`);}
 $(document).ready(async()=>{
  $('[data-page="explore"]').attr('aria-current','page');
@@ -34,6 +51,10 @@ $(document).ready(async()=>{
  $('dialog').on('click',function(e){if(e.target!==this)return;const r=this.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)this.close();});
  $(document).on('click','[data-map]',function(){openMap([findPlace(this.dataset.map)]);});
  $('#show-map').on('click',()=>openMap(places));
+ $('#route-map').on('click',()=>openMap(favorites.map(f=>f.place)));
+ $('#explore-map').on('click',()=>openMap(places));
+ $('#map-controls').on('change','#map-place',refreshMap);
+ $('#map-controls').on('change','#map-travel',()=>{const p=mapPlaces.find(p=>p.id===$('#map-place').val());if(p)view.mapLinks(p,$('#map-travel').val());});
  $(document).on('click','#save-note',guarded(async function(){
   const old=favorites.find(f=>f.id===this.dataset.id);if(!old)return;
   const next={...old,note:$('#note').val().trim(),visited:$('#visited').prop('checked')};
@@ -58,7 +79,8 @@ $(document).ready(async()=>{
  }));
  function network(){const online=navigator.onLine;$('#connection').text(online?'● En línea':'○ Sin conexión').css('color',online?'#537747':'#9b6724');}
  $(window).on('online offline',network);network();
- $('#google-status').text(`Google Maps: ${config.googleMapsApiKey?'clave configurada (pendiente de validar)':'pendiente de configurar'} · Firestore: ${config.firestoreProjectId?'proyecto configurado (pendiente de validar)':'pendiente de configurar'}`);
+ $('#google-status').text(`Google Maps: vista web e indicaciones disponibles. ${config.googleMapsApiKey?'API personalizada configurada; se valida al abrir el mapa.':'Marcadores de la API personalizada: requieren clave propia.'}`);
+ if(!config.firestoreProjectId||!config.firestoreApiKey){$('#source option[value=firestore]').prop('disabled',true).text('Firestore · requiere conectar un proyecto');}
  try{
   await db.open();ready=true;favorites=await db.all('favorites');
   $('#db-status').text('IndexedDB activo · favoritos y notas guardados en el dispositivo.');
@@ -74,6 +96,9 @@ $(document).ready(async()=>{
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#install').text('Instalar app ↗');});
 window.addEventListener('appinstalled',()=>{$('#install').text('App instalada ✓');installPrompt=null;});
 if('serviceWorker' in navigator){
+ const hadController=!!navigator.serviceWorker.controller;
+ let refreshing=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadController&&!refreshing){refreshing=true;location.reload();}});
  navigator.serviceWorker.register('./sw.js').then(async registration=>{
   await navigator.serviceWorker.ready;
   const worker=registration.active;

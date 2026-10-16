@@ -45,6 +45,13 @@ El catálogo se consulta en modo lectura. Las escrituras solicitadas para notas 
 
 ## Google Maps
 
+La aplicación funciona sin una clave de Maps JavaScript: muestra la vista web pública de Google Maps para cada lugar y ofrece enlaces documentados de Maps URLs para consultar el destino y obtener indicaciones a pie, en auto, en bicicleta o en transporte público. Puedes abrir el mapa desde el catálogo, el detalle de un lugar y Mi ruta. El selector recorre los lugares; no calcula ni optimiza un itinerario entre ellos.
+
+La vista web incrustada no es la Maps Embed API autenticada ni permite confirmar desde JavaScript que Google terminó de dibujar el mapa. Se mantiene visible un enlace directo si el navegador bloquea el iframe. Los mapas requieren internet; las coordenadas y notas siguen disponibles offline. Firestore aparece deshabilitado mientras falte su proyecto, evitando ofrecer una conexión que no existe.
+
+Para usar la **Maps JavaScript API con marcadores personalizados**, sigue la configuración siguiente:
+
+
 En un proyecto propio de Google Cloud habilita **Maps JavaScript API**, configura su facturación y una API key restringida por API y por dominios HTTP (localhost y el futuro dominio de GitHub Pages). Coloca la clave pública en `config.js`, campo `googleMapsApiKey`. No incluyas cuentas de servicio ni claves privadas. El mapa integrado necesita conexión; «Cómo llegar» abre Google Maps sin una clave de Maps JavaScript.
 
 Documentación: https://developers.google.com/maps/documentation/javascript/get-api-key y https://developers.google.com/maps/documentation/urls/guide

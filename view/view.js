@@ -1,3 +1,4 @@
+import {mapsSearchURL,mapsDirectionsURL} from '../model/maps-urls.js';
 export const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function artwork(icon){
  const colors={river:['#c5ddd4','#83b5ba'],houses:['#f0d7b8','#cf9e79'],forest:['#d0debb','#6a956f'],park:['#e5e7bd','#8ba775'],hill:['#d9e3d0','#779273'],heritage:['#e6dac6','#b6a17d']};
@@ -30,11 +31,21 @@ export class View {
   $('#saved-count').text(favorites.length);$('#result-count').text(`${filtered.length} lugares para descubrir`);
   const minutes=favorites.reduce((n,f)=>n+f.place.duration,0);
   $('#route-summary').text(`${favorites.length} lugares · ${Math.floor(minutes/60)} h ${minutes%60} min de recorrido estimado`);
-  $('#export-route').prop('disabled',!favorites.length);
+  $('#export-route, #route-map').prop('disabled',!favorites.length);
  }
  detail(p,saved){
   const e=escapeHTML;
-  $('#place-detail').html(`<div class="detail-art">${artwork(p.icon)}</div><span class="eyebrow">${e(p.category)} · ${e(p.area)}</span><h2 id="place-title">${e(p.name)}</h2><p>${e(p.description)}</p><p>◷ ${p.duration} minutos estimados · ⌖ ${p.lat}, ${p.lng}</p><p><strong>Antes de salir:</strong> ${e(p.tip)}</p><div class="detail-actions"><button class="primary" data-favorite="${e(p.id)}">${saved?'♥ Quitar de mi ruta':'♡ Guardar en mi ruta'}</button><button class="small-button" data-map="${e(p.id)}">Ver en Google Maps ↗</button><a class="small-button" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}" target="_blank" rel="noopener noreferrer">Cómo llegar ↗</a></div>${saved?`<label for="note">Mi nota para este lugar</label><textarea id="note" maxlength="1000" placeholder="Qué llevar, qué quieres conocer…">${e(saved.note||'')}</textarea><label class="check-label"><input id="visited" type="checkbox" ${saved.visited?'checked':''}> Ya visité este lugar</label><button id="save-note" class="small-button" data-id="${e(p.id)}">Guardar nota y visita</button>`:'<p>Guarda este lugar para añadir notas y registrar tu visita.</p>'}`);
+  $('#place-detail').html(`<div class="detail-art">${artwork(p.icon)}</div><span class="eyebrow">${e(p.category)} · ${e(p.area)}</span><h2 id="place-title">${e(p.name)}</h2><p>${e(p.description)}</p><p>◷ ${p.duration} minutos estimados · ⌖ ${p.lat}, ${p.lng}</p><p><strong>Antes de salir:</strong> ${e(p.tip)}</p><div class="detail-actions"><button class="primary" data-favorite="${e(p.id)}">${saved?'♥ Quitar de mi ruta':'♡ Guardar en mi ruta'}</button><button class="small-button" data-map="${e(p.id)}">Ver en Google Maps ↗</button><a class="small-button" href="${mapsDirectionsURL(p)}" target="_blank" rel="noopener noreferrer">Cómo llegar ↗</a></div>${saved?`<label for="note">Mi nota para este lugar</label><textarea id="note" maxlength="1000" placeholder="Qué llevar, qué quieres conocer…">${e(saved.note||'')}</textarea><label class="check-label"><input id="visited" type="checkbox" ${saved.visited?'checked':''}> Ya visité este lugar</label><button id="save-note" class="small-button" data-id="${e(p.id)}">Guardar nota y visita</button>`:'<p>Guarda este lugar para añadir notas y registrar tu visita.</p>'}`);
+ }
+ mapControls(places){
+  const e=escapeHTML;
+  $('#map-controls').html(`<div class="map-inputs"><label for="map-place">Elige un lugar<select id="map-place">${places.map(p=>`<option value="${e(p.id)}">${e(p.name)}</option>`).join('')}</select></label><label for="map-travel">Cómo quieres ir<select id="map-travel"><option value="walking">A pie</option><option value="driving">En auto</option><option value="bicycling">En bicicleta</option><option value="transit">Transporte público</option></select></label></div><div class="map-destination"><strong id="map-place-name"></strong><span id="map-coordinates"></span></div><div class="detail-actions"><a id="map-directions" class="primary" target="_blank" rel="noopener noreferrer">Cómo llegar ↗</a><a id="map-external" class="small-button" target="_blank" rel="noopener noreferrer">Abrir en Google Maps ↗</a></div><p class="map-help">Las indicaciones se abren en Google Maps, donde puedes elegir tu punto de partida. Si el mapa no aparece aquí, usa «Abrir en Google Maps».</p>`);
+ }
+ mapLinks(place,mode){
+  $('#map-place-name').text(place.name);
+  $('#map-coordinates').text(`${place.area} · ${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`);
+  $('#map-directions').attr('href',mapsDirectionsURL(place,mode));
+  $('#map-external').attr('href',mapsSearchURL(place));
  }
  page(name){$('.page').prop('hidden',true);$(`#${name}-page`).prop('hidden',false);$('.nav').removeClass('active').removeAttr('aria-current');$(`[data-page="${name}"]`).addClass('active').attr('aria-current','page');}
 }

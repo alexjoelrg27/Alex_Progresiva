@@ -3,6 +3,7 @@ import {readFile,access} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {normalize,parseCSV,Catalog} from '../model/catalog.js';
+import {mapsDirectionsURL,mapsSearchURL,mapsEmbedURL} from '../model/maps-urls.js';
 import {escapeHTML} from '../view/view.js';
 const root=new URL('../',import.meta.url);
 const json=JSON.parse(await readFile(new URL('data/places.json',root),'utf8'));
@@ -34,3 +35,12 @@ const worker=await readFile(new URL('sw.js',root),'utf8');
 const files=worker.match(/const FILES=\[([\s\S]*?)\];/)[1];
 for(const [,file]of files.matchAll(/'([^']+)'/g))await access(new URL(file,root));
 console.log('PASS: equivalencia JSON/CSV, CSV con comillas, validación, escape HTML, proveedor SQLite/WASM, Firestore sin configuración y recursos PWA.');
+
+for(const p of json){
+ const search=new URL(mapsSearchURL(p));assert.equal(search.origin,'https://www.google.com');assert.equal(search.searchParams.get('api'),'1');assert.equal(search.searchParams.get('query'),`${p.lat},${p.lng}`);
+ for(const mode of ['walking','driving','bicycling','transit']){const url=new URL(mapsDirectionsURL(p,mode));assert.equal(url.searchParams.get('destination'),`${p.lat},${p.lng}`);assert.equal(url.searchParams.get('travelmode'),mode);assert.equal(url.searchParams.get('api'),'1');}
+ assert.equal(new URL(mapsEmbedURL(p)).searchParams.get('output'),'embed');
+}
+assert.throws(()=>mapsDirectionsURL(json[0],'invalid'));
+assert.throws(()=>mapsEmbedURL({...json[0],lat:100}));
+console.log('PASS: destinos y modos de viaje de Google Maps, vista incrustada y coordenadas inválidas.');
